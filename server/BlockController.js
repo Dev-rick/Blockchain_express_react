@@ -23,72 +23,44 @@ class BlockController {
      * Implement a GET Endpoint to retrieve a block by index, url: "/api/block/:index"
      */
     getBlockByIndex() {
-        // this.app.get("/api/block/:index", (req, res) => {
           this.app.get('/api/blocks/:index', (req, res) => {
-            return new Promise((resolve) => {
-                let myBlockchain = new Blockchain();
-                setTimeout(( function addNewBlock() {
-                  myBlockchain.getBlock(req.params.index).then((block) => {
-                    console.log(block);
-                    res.send(block);
-                    return block;
-                  })
-            }), 1000);
-        });
-    });
-  }
-
+            let myBlockchain = new Blockchain();
+            myBlockchain.getBlock(req.params.index).then((block) => {
+              console.log(block);
+              res.send(block);
+              resolve();
+            });
+            });
+          }
     /**
      * Implement a POST Endpoint to add a new Block, url: "/api/block"
      */
     postNewBlock() {
-        this.app.post("/api/block", (req, res) => {
-          res.send("HElloe");
-            // Add your code here
+       this.app.post("/api/block", (req, res) => {
+            let myBlockchain = new Blockchain();
+            let message = req.body.message;
+            if (req.body.message.length === 0){
+              res.send("No Body -> No Block Added")
+            } else {
+              console.log(message);
+              let blockToAdd = new Block(message);
+              myBlockchain.addBlock(blockToAdd)
+                .then((blockToAdd) => {
+                  console.log(blockToAdd);
+                  return res.send(blockToAdd);
+                });
+              }
         });
-
     }
 
     /**
-     * Help method to inizialized Mock dataset, adds 10 test blocks to the blocks array
+     * Help method to inizialized Mock dataset, adds 1 genesis block to levelDB
      */
     initializeMockData() {
           return new Promise((resolve) => {
               let myBlockchain = new Blockchain();
-              setTimeout(( function addNewBlock() {
-                  // myBlockchain.getBlock(4).then((block) => {    // grab a block
-                  //     block.hash = 'eddfd5e6c4f2101d110c09e00ee80d46e4b3dbc4bbdee6a1002fe461eae28026';  // parse as JSON
-                  //     block.body = 'error';    // modify body
-                  //     addLevelDBData(4, JSON.stringify(block));   // reinsert in the same position
-                  // });
-                  myBlockchain.getBlock(4).then((block) => {
-                    console.log(block);
-                    return block;
-                  })
-                  // myBlockchain.addBlock(new Block());
-                  // setTimeout((function validateChain() {
-                  //     myBlockchain.validateChain();
-                  //     setTimeout((function logBlockChain() {
-                  //         myBlockchain.getChain().then(() => {
-                  //             console.log('Here is your blockchain...\n');
-                  //             console.log(myBlockchain);
-                  //
-                  //         });
-                  //     }), 1000);
-                  // }), 1000);
-              }), 1000);
-
           });
       };
-
-        // if(this.blocks.length === 0){
-        //     for (let index = 0; index < 10; index++) {
-        //         let blockAux = new BlockClass.Block(`Test Data #${index}`);
-        //         blockAux.height = index;
-        //         blockAux.hash = SHA256(JSON.stringify(blockAux)).toString();
-        //         this.blocks.push(blockAux);
-        //     }
-        // }
 
 }
 

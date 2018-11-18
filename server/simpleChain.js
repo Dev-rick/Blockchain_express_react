@@ -57,7 +57,8 @@ class Blockchain {
 
     // Add new block
     addBlock(newBlock) {
-        this.getChain().then((dataArray) => {
+        return this.getChain().then((dataArray) => {
+          return new Promise((resolve, reject) => {
             if (dataArray.length > 0) {
                 this.getBlock(dataArray.length - 1).then((requestedBlock) => {
                     console.log('adding following block...\n');
@@ -68,13 +69,13 @@ class Blockchain {
                     // previous block hash
                     newBlock.previousBlockHash = requestedBlock.hash;
                     newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-                    console.log(newBlock);
-                    return addLevelDBData(dataArray.length, JSON.stringify(newBlock).toString());
+                    resolve(addLevelDBData(dataArray.length, JSON.stringify(newBlock).toString()));
                 });
             } else {
                 console.log('Genesis Block is missing\n');
                 return;
             }
+          });
         });
     }
 
@@ -170,18 +171,5 @@ class Blockchain {
     }
 }
 
-
-// function to start or add a block on the chain
-
-
-//Listener for Terminal! Test it out :)
-// (function Listener() {
-//     var stdin = process.openStdin();
-//     console.log('Please enter a message which will be secured on the blockchain or press "CTRL + C" to exit: \n');
-//     stdin.addListener('data', function(d) {
-//         console.log('You entered: [' + d.toString().trim() + ']\n');
-//         startBlockChain(d.toString().trim());
-//     });
-// })();
 
 export default Blockchain;

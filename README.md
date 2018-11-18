@@ -1,15 +1,15 @@
-# react_express_boilerplate_updated
+# RESTful Web API with Node.js Framework (UDACITY)
 
 
-COPIED and UPDATED from https://github.com/bradtraversy/react_express_starter
+> First part of full private Blockchain project
 
-THANKS A LOT!
+### ONLY SERVER SIDE TESTING WITH CURL OR POSTMAN
 
-> Create full stack apps with React and Express. Run your client and server with a single command. 
+* This version does not includes already front end but it is still under development.
+* When using postman:
+    * localhost:5000/api/block --> To add a block with content (specify in Postman the Content-Type as application/x-www-form-urlencoded and use key("message")-value("your message to store on the blockchain") under Body section with application/x-www-form-urlencoded)
+    * localhost:5000/api/blocks/[number] --> Returns the block with the key requested
 
-### Redux Version
-This version does not include Redux
-[Click Here For Redux Version](https://github.com/bradtraversy/react_redux_express_starter) 
 
 ## Quick Start
 
@@ -36,14 +36,8 @@ npm run client
 
 ### Author
 
-Brad Traversy
-[Traversy Media](http://www.traversymedia.com)
-
+Rick Warling
 
 ### Version
 
 1.0.0
-
-### License
-
-This project is licensed under the MIT License
