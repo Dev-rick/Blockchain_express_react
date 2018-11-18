@@ -24,35 +24,19 @@ class BlockController {
      */
     getBlockByIndex() {
         // this.app.get("/api/block/:index", (req, res) => {
-          this.app.get('/api/blocks/', (req, res) => {
-          console.log();
-            const blocks = [
-              {
-                id: 1,
-                firstName: 'John',
-                lastName: 'Doe'
-              },
-              {
-                id: 2,
-                firstName: 'Johnny',
-                lastName: 'Doe'
-              },
-              {
-                id: 3,
-                firstName: 'Pablo',
-                lastName: 'Doe'
-              }
-            ];
-            res.json(blocks);
-          // console.log(this.params.index);
-          // if (req.params.index < this.blocks.length ) {
-          //   res.send("first_if");
-          //   res.send(this.block[req.params.index])
-          // } else {
-          //   res.send(blocks[req.params.index])
-          // }
+          this.app.get('/api/blocks/:index', (req, res) => {
+            return new Promise((resolve) => {
+                let myBlockchain = new Blockchain();
+                setTimeout(( function addNewBlock() {
+                  myBlockchain.getBlock(req.params.index).then((block) => {
+                    console.log(block);
+                    res.send(block);
+                    return block;
+                  })
+            }), 1000);
         });
-    }
+    });
+  }
 
     /**
      * Implement a POST Endpoint to add a new Block, url: "/api/block"
@@ -68,7 +52,7 @@ class BlockController {
     /**
      * Help method to inizialized Mock dataset, adds 10 test blocks to the blocks array
      */
-    initializeMockData(message) {
+    initializeMockData() {
           return new Promise((resolve) => {
               let myBlockchain = new Blockchain();
               setTimeout(( function addNewBlock() {
@@ -77,17 +61,21 @@ class BlockController {
                   //     block.body = 'error';    // modify body
                   //     addLevelDBData(4, JSON.stringify(block));   // reinsert in the same position
                   // });
-                  myBlockchain.addBlock(new Block(message));
-                  setTimeout((function validateChain() {
-                      myBlockchain.validateChain();
-                      setTimeout((function logBlockChain() {
-                          myBlockchain.getChain().then(() => {
-                              console.log('Here is your blockchain...\n');
-                              console.log(myBlockchain);
-                              process.exit();
-                          });
-                      }), 1000);
-                  }), 1000);
+                  myBlockchain.getBlock(4).then((block) => {
+                    console.log(block);
+                    return block;
+                  })
+                  // myBlockchain.addBlock(new Block());
+                  // setTimeout((function validateChain() {
+                  //     myBlockchain.validateChain();
+                  //     setTimeout((function logBlockChain() {
+                  //         myBlockchain.getChain().then(() => {
+                  //             console.log('Here is your blockchain...\n');
+                  //             console.log(myBlockchain);
+                  //
+                  //         });
+                  //     }), 1000);
+                  // }), 1000);
               }), 1000);
 
           });
