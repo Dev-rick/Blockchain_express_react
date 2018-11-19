@@ -26,14 +26,14 @@ class BlockAPI {
      * Initilization of the Express framework
      */
 	initExpress() {
-		this.app.set("port", 5000);
+		this.app.set("port", 8000);
 	}
 
     /**
      * Initialization of the middleware modules
      */
 
-     
+
 	initExpressMiddleWare() {
 		this.app.use(bodyParser.urlencoded({extended:true}));
 		this.app.use(bodyParser.json());

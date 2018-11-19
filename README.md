@@ -7,8 +7,8 @@
 
 * This version does not includes already front end but it is still under development.
 * When using postman:
-    * localhost:5000/api/block --> To add a block with content (specify in Postman the Content-Type as application/x-www-form-urlencoded and use key("message")-value("your message to store on the blockchain") under Body section with application/x-www-form-urlencoded)
-    * localhost:5000/api/blocks/[number] --> Returns the block with the key requested
+    * POST Request + localhost:8000/api/block --> To add a block with content (specify in Postman the Content-Type as application/x-www-form-urlencoded and use key("body")-value("your message to store on the blockchain") under Body section with application/x-www-form-urlencoded)
+    * GET request + localhost:8000/api/block/[number] --> Returns the block with the key requested
 
 
 ## Quick Start

@@ -1,7 +1,7 @@
 import SHA256 from 'crypto-js/sha256';
 import Block from './Block.js'
 import Blockchain from './simpleChain.js';
-
+import path from 'path';
 /**
  * Controller Definition to encapsulate routes to work with blocks
  */
@@ -23,13 +23,19 @@ class BlockController {
      * Implement a GET Endpoint to retrieve a block by index, url: "/api/block/:index"
      */
     getBlockByIndex() {
-          this.app.get('/api/blocks/:index', (req, res) => {
+          this.app.get('/api/block/:index', (req, res) => {
             let myBlockchain = new Blockchain();
-            myBlockchain.getBlock(req.params.index).then((block) => {
-              console.log(block);
-              res.send(block);
-              resolve();
-            });
+            myBlockchain.getChain()
+              .then((chain) => {
+                if (req.params.index < chain.length) {
+                  myBlockchain.getBlock(req.params.index).then((block) => {
+                    console.log(block);
+                    return res.send(block);
+                  });
+                } else {
+                  return res.send("Block not found")
+                }
+              })
             });
           }
     /**
@@ -38,9 +44,9 @@ class BlockController {
     postNewBlock() {
        this.app.post("/api/block", (req, res) => {
             let myBlockchain = new Blockchain();
-            let message = req.body.message;
-            if (req.body.message.length === 0){
-              res.send("No Body -> No Block Added")
+            let message = req.body.body;
+            if (req.body.body === undefined || req.body.body.length === 0){
+              return res.send("No Body -> No Block Added")
             } else {
               console.log(message);
               let blockToAdd = new Block(message);
@@ -57,11 +63,10 @@ class BlockController {
      * Help method to inizialized Mock dataset, adds 1 genesis block to levelDB
      */
     initializeMockData() {
-          return new Promise((resolve) => {
-              let myBlockchain = new Blockchain();
-          });
-      };
-
+      this.app.get("/", (req, res) => {
+           return res.sendFile(path.join(__dirname + '/../README.md'));
+        })
+  };
 }
 
 /**
