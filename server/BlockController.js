@@ -14,25 +14,35 @@ class BlockController {
   constructor(app) {
     this.app = app;
     this.mempool = new Mempool();
+    this.address = '1CBC8hDRV8PYt4Z95To3dhmCzmXgfbFG3m';
     this.requestValidation();
     this.initializeMockData();
     this.getBlockByIndex();
     this.postNewBlock();
+    this.messageSignatureValidation();
   }
 
   /**
    * Implement a GET Endpoint to retrieve a block by index, url: "/api/block/:index"
    */
 
-   requestValidation() {
-     this.app.post('/requestValidation', (req, res) => {
-       let address = '1CBC8hDRV8PYt4Z95To3dhmCzmXgfbFG3m';
-       this.mempool.functionWichWillPutRequestInMempool(address).then((responseFromMempool) => {
-         console.log(responseFromMempool);
-         res.send(responseFromMempool);
-       });
-     });
-   }
+  requestValidation() {
+    this.app.post('/requestValidation', (req, res) => {
+      this.mempool.functionWichWillPutRequestInMempool(this.address).then((responseFromMempool) => {
+        console.log(responseFromMempool);
+        res.send(responseFromMempool);
+      });
+    });
+  }
+
+  messageSignatureValidation() {
+    this.app.post('/message-signature/validate', (req, res) => {
+      let signature = ""
+      this.mempool.funcionWhichWillValidateTheMessageAndRemovesItFromTheMempool(this.address, signature).then((response) => {
+        res.send(response);
+      });
+    });
+  }
 
 
   getBlockByIndex() {
@@ -51,6 +61,7 @@ class BlockController {
         });
     });
   }
+
   /**
    * Implement a POST Endpoint to add a new Block, url: "/api/block"
    */
