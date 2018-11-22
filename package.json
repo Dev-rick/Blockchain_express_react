@@ -16,13 +16,15 @@
     "concurrently": "^4.0.1",
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.4",
-    "level": "^4.0.0"
+    "level": "^4.0.0",
+    "bitcoinjs-lib": "^4.0.2",
+    "bitcoinjs-message": "^2.0.0",
+    "hex2ascii": "0.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-es2017": "^7.0.0-beta.53",
-    "@babel/register": "^7.0.0",
-    "eslint": "^5.9.0"
+    "@babel/register": "^7.0.0"
   }
 }

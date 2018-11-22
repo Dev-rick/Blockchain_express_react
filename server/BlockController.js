@@ -1,6 +1,7 @@
 import Block from './Block.js';
 import Blockchain from './simpleChain.js';
 import path from 'path';
+import Mempool from './mempool.js';
 /**
  * Controller Definition to encapsulate routes to work with blocks
  */
@@ -12,7 +13,8 @@ class BlockController {
    */
   constructor(app) {
     this.app = app;
-    this.blocks = [];
+    this.mempool = new Mempool();
+    this.requestValidation();
     this.initializeMockData();
     this.getBlockByIndex();
     this.postNewBlock();
@@ -21,6 +23,18 @@ class BlockController {
   /**
    * Implement a GET Endpoint to retrieve a block by index, url: "/api/block/:index"
    */
+
+   requestValidation() {
+     this.app.post('/requestValidation', (req, res) => {
+       let address = '1CBC8hDRV8PYt4Z95To3dhmCzmXgfbFG3m';
+       this.mempool.functionWichWillPutRequestInMempool(address).then((responseFromMempool) => {
+         console.log(responseFromMempool);
+         res.send(responseFromMempool);
+       });
+     });
+   }
+
+
   getBlockByIndex() {
     this.app.get('/api/block/:index', (req, res) => {
       let myBlockchain = new Blockchain();
