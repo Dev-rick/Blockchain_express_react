@@ -26,15 +26,24 @@ class Mempool {
       }
     });
   }
+
+  checkIfAddressIsInMempoolValidRegistry(address) {
+    return new Promise((resolve, reject) => {
+      for (let request of this.mempoolValidRegistry) {
+        console.log(request.status.address, address);
+        if (request.status.address === address) {
+          resolve();
+        }
+      }
+      reject('There is no request.\n\n Please make first a request at localhost:8000/requestValidation and then sign this message');
+    });
+  }
   updateValidationWindow(request) {
     const TimeoutRequestsWindowTime = 5 * 60 * 10;
     const timestampOfRequest = request.timestamp;
     let timeElapse = (new Date().getTime().toString().slice(0, -3)) - timestampOfRequest;
     let timeLeft = (TimeoutRequestsWindowTime / 1000) - timeElapse;
     request.validationWindow = timeLeft;
-  }
-  checkingIfAddressHasAValidRequest() {
-    
   }
   funcionWhichWillValidateTheMessageAndRemovesItFromTheMempool(address, signature) {
     return new Promise((resolve) => {
@@ -45,6 +54,7 @@ class Mempool {
           if (request.walletAddress === address) {
             this.updateValidationWindow(request);
             if (parseInt(request.validationWindow) < 1) {
+              console.log(request.message, address, signature);
               try {
                 let isValid = bitcoinMessage.verify(request.message, address, signature);
                 if (isValid) {

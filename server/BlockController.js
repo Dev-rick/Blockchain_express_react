@@ -71,20 +71,33 @@ class BlockController {
   postNewBlock() {
     this.app.post('/block', (req, res) => {
       let myBlockchain = new Blockchain();
-      let message = req.body.message
-      // let jsonObject = req.body.address;
-      // res.send(jsonObject);
-      if (req.body.body === undefined || req.body.body.length === 0) {
+      let jsonObject = req.body;
+      if (jsonObject === undefined || JSON.stringify(jsonObject).length === 0) {
         return res.send('No Body -> No Block Added');
-      } else {
-        console.log(message);
-        let blockToAdd = new Block(message);
+      }
+
+      let output = [];
+      for (let key in jsonObject) {
+        if (jsonObject.hasOwnProperty(key)) {
+          if (output.includes(key)) {
+            res.send('please only save one star!');
+          } else {
+            output.push(key);
+          }
+        }
+      }
+
+      this.mempool.checkIfAddressIsInMempoolValidRegistry(req.body.address).then(() => {
+        let blockToAdd = new Block(jsonObject);
         myBlockchain.addBlock(blockToAdd)
           .then((blockToAdd) => {
             console.log(blockToAdd);
             return res.send(blockToAdd);
           });
-      }
+      }).catch((err) => {
+        console.log(err);
+        res.send(err);
+      });
     });
   }
 
