@@ -2,6 +2,8 @@ import Block from './Block.js';
 import Blockchain from './simpleChain.js';
 import path from 'path';
 import Mempool from './mempool.js';
+// Require file system access
+import fs from 'fs';
 /**
  * Controller Definition to encapsulate routes to work with blocks
  */
@@ -14,7 +16,6 @@ class BlockController {
   constructor(app) {
     this.app = app;
     this.mempool = new Mempool();
-    this.address = '1CBC8hDRV8PYt4Z95To3dhmCzmXgfbFG3m';
     this.requestValidation();
     this.initializeMockData();
     this.getBlockByIndex();
@@ -28,7 +29,8 @@ class BlockController {
 
   requestValidation() {
     this.app.post('/requestValidation', (req, res) => {
-      this.mempool.functionWichWillPutRequestInMempool(this.address).then((responseFromMempool) => {
+      let address = req.body.address;
+      this.mempool.functionWhichWillCreateARequestIfNoExists(address).then((responseFromMempool) => {
         console.log(responseFromMempool);
         res.send(responseFromMempool);
       });
@@ -37,8 +39,9 @@ class BlockController {
 
   messageSignatureValidation() {
     this.app.post('/message-signature/validate', (req, res) => {
-      let signature = ""
-      this.mempool.funcionWhichWillValidateTheMessageAndRemovesItFromTheMempool(this.address, signature).then((response) => {
+      let address = req.body.address;
+      let signature = req.body.signature;
+      this.mempool.funcionWhichWillValidateTheMessageAndRemovesItFromTheMempool(address, signature).then((response) => {
         res.send(response);
       });
     });
@@ -66,9 +69,11 @@ class BlockController {
    * Implement a POST Endpoint to add a new Block, url: "/api/block"
    */
   postNewBlock() {
-    this.app.post('/api/block', (req, res) => {
+    this.app.post('/block', (req, res) => {
       let myBlockchain = new Blockchain();
-      let message = req.body.body;
+      let message = req.body.message
+      // let jsonObject = req.body.address;
+      // res.send(jsonObject);
       if (req.body.body === undefined || req.body.body.length === 0) {
         return res.send('No Body -> No Block Added');
       } else {
