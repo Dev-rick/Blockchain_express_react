@@ -14,11 +14,14 @@ class BlockController {
   constructor(app) {
     this.app = app;
     this.mempool = new Mempool();
+    this.myBlockchain = new Blockchain();
     this.requestValidation();
     this.initializeMockData();
     this.getBlockByIndex();
     this.postNewBlock();
     this.messageSignatureValidation();
+    this.getBlockByTheHash();
+    this.getBlocksByTheWalletAddress();
   }
 
   /**
@@ -47,17 +50,82 @@ class BlockController {
 
 
   getBlockByIndex() {
-    this.app.get('/api/block/:index', (req, res) => {
-      let myBlockchain = new Blockchain();
-      myBlockchain.getChain()
+    this.app.get('/block/:index', (req, res) => {
+      if (req.params.index <= 0 || isNaN(req.params.index)) {
+        return res.send('Please enter a valid height');
+      } else {
+        this.myBlockchain.getChain()
+          .then((chain) => {
+            if (req.params.index > chain.length) {
+              return res.send('Block not found');
+            } else {
+              this.myBlockchain.getBlockByHeight(req.params.index).then((block) => {
+                if (block.height === 1) {
+                  // Genesis Block does not need to be decoded.
+                  console.log(block);
+                  return res.send(block);
+                } else {
+                  const blockDecoded = new BlockDecoded(block);
+                  console.log(blockDecoded);
+                  return res.send(blockDecoded);
+                }
+              });
+            }
+          });
+      }
+    });
+  }
+
+  getBlockByTheHash() {
+    this.app.get('/stars/hash:hash', (req, res) => {
+      const hash =  req.params.hash.slice(1)
+      this.myBlockchain.getChain()
         .then((chain) => {
-          if (req.params.index < 0 || req.params.index > chain.length) {
+          if (hash < 0 || hash > chain.length) {
             return res.send('Block not found');
           } else {
-            myBlockchain.getBlock(req.params.index).then((block) => {
-              console.log(block);
-              return res.send(block);
-            });
+            this.myBlockchain.getBlockByHash(hash).then((block) => {
+              if (block.height === 1) {
+                // Genesis Block does not need to be decoded.
+                console.log(block);
+                return res.send(block);
+              } else {
+                const blockDecoded = new BlockDecoded(block);
+                console.log(blockDecoded);
+                return res.send(blockDecoded);
+              }
+              })
+              .catch((err) => {
+                return res.send(err);
+              });
+          }
+        });
+    });
+  }
+
+  getBlocksByTheWalletAddress() {
+    this.app.get('/stars/address:address', (req, res) => {
+      const address = req.params.address.slice(1);
+      this.myBlockchain.getChain()
+        .then((chain) => {
+          if (address < 0 || address > chain.length) {
+            return res.send('Block not found');
+          } else {
+            this.myBlockchain.getBlocksByWalletAddress(address).then((arrayOfBlocks) => {
+                const outputOfBlocks = [];
+                arrayOfBlocks.forEach(block => {
+                  if (block.height === 1) {
+                    outputOfBlocks.push(block);
+                  } else {
+                    outputOfBlocks.push(new BlockDecoded(block));
+                  }
+                });
+                console.log(outputOfBlocks);
+                return res.send(outputOfBlocks);
+              })
+              .catch((err) => {
+                return res.send(err);
+              });
           }
         });
     });
@@ -68,7 +136,6 @@ class BlockController {
    */
   postNewBlock() {
     this.app.post('/block', (req, res) => {
-      const myBlockchain = new Blockchain();
       const maxBytesForStory = 500;
       const isASCII = ((str) => /^[\x00-\x7F]*$/.test(str));
       const body = req.body;
@@ -124,7 +191,7 @@ class BlockController {
       this.mempool.makeRequestInvalidInMempoolValidRegistry(address);
       let blockToAdd = new Block(body);
       console.log(blockToAdd);
-      myBlockchain.addBlock(blockToAdd)
+      this.myBlockchain.addBlock(blockToAdd)
         .then((blockToAddString) => {
           const blockToAddObject = JSON.parse(blockToAddString);
           const blockDecoded = new BlockDecoded(blockToAddObject);

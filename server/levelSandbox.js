@@ -46,6 +46,42 @@ export const readLevelDBData = () => {
   });
 };
 
+export const getLevelDBDataByHash = (hash) => {
+  return new Promise((resolve, reject) => {
+    let keyOfBlock = null;
+    db.createReadStream()
+      .on('data', function(data) {
+        if(JSON.parse(data.value).hash === hash){
+            keyOfBlock = data.key;
+        }
+      })
+      .on('error', function(err) {
+        reject(err);
+      })
+      .on('close', function() {
+        resolve(keyOfBlock);
+      });
+  });
+};
+
+export const getLevelDBDataByWalletAddress = (address) => {
+  return new Promise((resolve, reject) => {
+    let keysOfBlocks = [];
+    db.createReadStream()
+      .on('data', function(data) {
+        if(JSON.parse(data.value).body.address === address){
+            keysOfBlocks.push(data.key);
+        }
+      })
+      .on('error', function(err) {
+        reject(err);
+      })
+      .on('close', function() {
+        resolve(keysOfBlocks);
+      });
+  });
+};
+
 /* ===== Testing ==============================================================|
 |  - Self-invoking function to add blocks to chain                             |
 |  - Learn more:                                                               |

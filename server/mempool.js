@@ -8,7 +8,7 @@ class Mempool {
     this.mempoolRegistry = []; //saves the whole request
     this.mempoolRegistryOnlyAddresses = []; //exists only for a faster check if request is still in the mempoolRegistry
     this.mempoolValidRegistry = []; //if not in here the time to validate (validationWindow) has not yet expired
-    this.mempoolValidRegistryOnlyAdresses = []; //exists only for a faster check if request is still in the mempoolValidRegistry
+    this.mempoolValidRegistryOnlyAddresses = []; //exists only for a faster check if request is still in the mempoolValidRegistry
   }
   functionWhichWillCreateARequestIfNoExists(address) {
     return new Promise((resolve) => {
@@ -17,7 +17,7 @@ class Mempool {
         this.mempoolRegistryOnlyAddresses.push(address);
         this.mempoolRegistry.push(request);
         setTimeout(function(address) {
-          this.makeRequestInvalidInMempoolRegistry(address)
+          this.makeRequestInvalidInMempoolRegistry(address);
         }, 5 * 60 * 1000);
         resolve(request);
       } else {
@@ -32,40 +32,42 @@ class Mempool {
   }
 
   makeRequestInvalidInMempoolValidRegistry(address) {
+    let indexOne = this.mempoolValidRegistryOnlyAddresses.indexOf(address);
+    this.mempoolValidRegistryOnlyAddresses.splice(indexOne, 1);
     this.mempoolValidRegistry.forEach(mempoolValid => {
       if (mempoolValid.status.address === address) {
         let indexTwo = this.mempoolValidRegistry.indexOf(mempoolValid);
         this.mempoolValidRegistry.splice(indexTwo, 1);
       }
     });
-    let indexOne = this.mempoolValidRegistryOnlyAdresses.indexOf(address);
-    this.mempoolValidRegistryOnlyAdresses.splice(indexOne, 1);
+    return;
   }
 
   makeRequestInvalidInMempoolRegistry(address) {
+    let indexOne = this.mempoolRegistryOnlyAddresses.indexOf(address);
+    this.mempoolRegistryOnlyAddresses.splice(indexOne, 1);
     this.mempoolRegistry.forEach(request => {
-      if (request.status.address === address) {
+      if (request.walletAddress === address) {
         let indexTwo = this.mempoolRegistry.indexOf(request);
         this.mempoolRegistry.splice(indexTwo, 1);
       }
     });
-    let indexOne = this.mempoolRegistryOnlyAdresses.indexOf(address);
-    this.mempoolRegistryOnlyAdresses.splice(indexOne, 1);
+    return;
   }
 
   verifyAddressRequest(address) {
-  return this.mempoolValidRegistryOnlyAdresses.includes(address) ? true : false;
+    return this.mempoolValidRegistryOnlyAddresses.includes(address) ? true : false;
   }
 
   updateValidationWindow(request, alreadyInMempoolValidRegistry) {
     if (!alreadyInMempoolValidRegistry) {
-      const mempoolRegistryWindowTime = 5 * 60 * 10;
+      const mempoolRegistryWindowTime = 5 * 60 * 1000;
       const timestampOfRequest = request.timestamp;
       let timeElapse = (new Date().getTime().toString().slice(0, -3)) - timestampOfRequest;
       let timeLeft = (mempoolRegistryWindowTime / 1000) - timeElapse;
       request.validationWindow = timeLeft;
     } else {
-      const mempoolValidRegistryWindowTime = 30 * 60 * 10;
+      const mempoolValidRegistryWindowTime = 30 * 60 * 1000;
       const timestampOfRequest = request.status.requestTimeStamp;
       let timeElapse = (new Date().getTime().toString().slice(0, -3)) - timestampOfRequest;
       let timeLeft = (mempoolValidRegistryWindowTime / 1000) - timeElapse;
@@ -84,12 +86,13 @@ class Mempool {
             try {
               let isValid = bitcoinMessage.verify(request.message, address, signature);
               if (isValid) {
-                this.makeRequestInvalidInMempoolRegistry(address)
-                let mempoolValid = new MempoolValid(request.walletAddress, request.timestamp, request.message, request.validationWindow, true);
-                this.mempoolValidRegistryOnlyAdresses.push(address);
+                this.makeRequestInvalidInMempoolRegistry(address);
+                let mempoolValid = new MempoolValid(request);
+                console.log(address);
+                this.mempoolValidRegistryOnlyAddresses.push(address);
                 this.mempoolValidRegistry.push(mempoolValid);
                 setTimeout(function(address) {
-                  this.makeRequestInvalidInMempoolValidRegistry(address)
+                  this.makeRequestInvalidInMempoolValidRegistry(address);
                 }, 30 * 60 * 1000);
                 console.log(JSON.stringify(mempoolValid) + '\n\nYou are granted access to store a star\n\n');
                 resolve(mempoolValid);

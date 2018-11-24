@@ -1,12 +1,12 @@
 class MempoolValid {
-  constructor(walletAddress, requestTimeStamp, message, validationWindow, valid) {
+  constructor(request) {
     this.registerStar = true;
     this.status = {
-      address: walletAddress,
-      requestTimeStamp: requestTimeStamp,
-      message: message,
-      validationWindow: 30 * 60 * 1000,
-      messageSignature: valid
+      address: request.walletAddress,
+      requestTimeStamp: request.requestTimeStamp,
+      message: request.message,
+      validationWindow: 30 * 60,
+      messageSignature: true
     };
   }
 }
