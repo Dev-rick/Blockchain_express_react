@@ -8,7 +8,7 @@ import {
     readLevelDBData,
     getLevelDBData
 } from './levelSandbox';
-import Block from './Block.js'
+import Block from './Block.js';
 
 
 
@@ -134,7 +134,7 @@ class Blockchain {
                 PromiseArray.push(this.validateBlock(i));
             }
             Promise.all(PromiseArray)
-                .then((results) => {
+                .then(() => {
                     console.log('Now checking the chain...\n');
                 })
                 .then(() => {

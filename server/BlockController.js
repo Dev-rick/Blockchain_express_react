@@ -53,13 +53,13 @@ class BlockController {
       let myBlockchain = new Blockchain();
       myBlockchain.getChain()
         .then((chain) => {
-          if (req.params.index < chain.length) {
+          if (req.params.index < 0 || req.params.index > chain.length) {
+            return res.send('Block not found');
+          } else {
             myBlockchain.getBlock(req.params.index).then((block) => {
               console.log(block);
               return res.send(block);
             });
-          } else {
-            return res.send('Block not found');
           }
         });
     });
@@ -75,7 +75,7 @@ class BlockController {
       if (jsonObject === undefined || JSON.stringify(jsonObject).length === 0) {
         return res.send('No Body -> No Block Added');
       }
-
+      // checks if only one star is in the request
       let output = [];
       for (let key in jsonObject) {
         if (jsonObject.hasOwnProperty(key)) {
@@ -86,7 +86,7 @@ class BlockController {
           }
         }
       }
-
+      //if a signed request exists the user is able to register the star
       this.mempool.checkIfAddressIsInMempoolValidRegistry(req.body.address).then(() => {
         let blockToAdd = new Block(jsonObject);
         myBlockchain.addBlock(blockToAdd)
