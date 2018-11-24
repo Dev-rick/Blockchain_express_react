@@ -69,7 +69,7 @@ class Blockchain {
                     // previous block hash
                     newBlock.previousBlockHash = requestedBlock.hash;
                     newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-                    resolve(addLevelDBData(dataArray.length, JSON.stringify(newBlock).toString()));
+                    resolve(addLevelDBData(dataArray.length, JSON.stringify(newBlock)));
                 });
             } else {
                 console.log('Genesis Block is missing\n');

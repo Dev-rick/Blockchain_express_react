@@ -1,5 +1,5 @@
-import Request from './request.js';
-import MempoolValid from './mempoolValid.js';
+import Request from './Request.js';
+import MempoolValid from './MempoolValid.js';
 import bitcoinMessage from 'bitcoinjs-message';
 
 
@@ -16,11 +16,8 @@ class Mempool {
         let request = new Request(address);
         this.mempoolRegistryOnlyAddresses.push(address);
         this.mempoolRegistry.push(request);
-        setTimeout(function(address, request) {
-          let indexOne = this.mempoolRegistryOnlyAddresses.indexOf(address);
-          let indexTwo = this.mempool.indexOf(request);
-          this.mempoolRegistryOnlyAddresses.splice(indexOne, 1);
-          this.mempool.splice(indexTwo, 1);
+        setTimeout(function(address) {
+          this.makeRequestInvalidInMempoolRegistry(address)
         }, 5 * 60 * 1000);
         resolve(request);
       } else {
@@ -34,23 +31,32 @@ class Mempool {
     });
   }
 
-  checkIfAddressIsInMempoolValidRegistry(address) {
-    return new Promise((resolve, reject) => {
-      if (!this.mempoolValidRegistryOnlyAdresses.includes(address)) {
-        reject('There is no request.\n\nPlease make first a request at localhost:8000/requestValidation and then sign this message');
-      } else {
-        this.mempoolValidRegistry.forEach(mempoolValid => {
-          if (mempoolValid.status.address === address) {
-            let indexTwo = this.mempoolValidRegistry.indexOf(mempoolValid);
-            this.mempoolValidRegistry.splice(indexTwo, 1);
-          }
-        });
-          let indexOne = this.mempoolValidRegistryOnlyAdresses.indexOf(address);
-          this.mempoolValidRegistryOnlyAdresses.splice(indexOne, 1);
-        resolve();
+  makeRequestInvalidInMempoolValidRegistry(address) {
+    this.mempoolValidRegistry.forEach(mempoolValid => {
+      if (mempoolValid.status.address === address) {
+        let indexTwo = this.mempoolValidRegistry.indexOf(mempoolValid);
+        this.mempoolValidRegistry.splice(indexTwo, 1);
       }
     });
+    let indexOne = this.mempoolValidRegistryOnlyAdresses.indexOf(address);
+    this.mempoolValidRegistryOnlyAdresses.splice(indexOne, 1);
   }
+
+  makeRequestInvalidInMempoolRegistry(address) {
+    this.mempoolRegistry.forEach(request => {
+      if (request.status.address === address) {
+        let indexTwo = this.mempoolRegistry.indexOf(request);
+        this.mempoolRegistry.splice(indexTwo, 1);
+      }
+    });
+    let indexOne = this.mempoolRegistryOnlyAdresses.indexOf(address);
+    this.mempoolRegistryOnlyAdresses.splice(indexOne, 1);
+  }
+
+  verifyAddressRequest(address) {
+  return this.mempoolValidRegistryOnlyAdresses.includes(address) ? true : false;
+  }
+
   updateValidationWindow(request, alreadyInMempoolValidRegistry) {
     if (!alreadyInMempoolValidRegistry) {
       const mempoolRegistryWindowTime = 5 * 60 * 10;
@@ -78,18 +84,12 @@ class Mempool {
             try {
               let isValid = bitcoinMessage.verify(request.message, address, signature);
               if (isValid) {
-                let indexOne = this.mempoolRegistry.indexOf(request);
-                let indexTwo = this.mempoolRegistryOnlyAddresses.indexOf(request);
-                this.mempoolRegistry.splice(indexOne, 1);
-                this.mempoolRegistryOnlyAddresses.splice(indexTwo, 1);
+                this.makeRequestInvalidInMempoolRegistry(address)
                 let mempoolValid = new MempoolValid(request.walletAddress, request.timestamp, request.message, request.validationWindow, true);
                 this.mempoolValidRegistryOnlyAdresses.push(address);
                 this.mempoolValidRegistry.push(mempoolValid);
-                setTimeout(function(address, mempoolValid) {
-                  let indexOne = this.mempoolValidRegistryOnlyAdresses.indexOf(address);
-                  let indexTwo = this.mempoolValidRegistry.indexOf(mempoolValid);
-                  this.mempoolValidRegistryOnlyAdresses.splice(indexOne, 1);
-                  this.mempoolValidRegistry.splice(indexTwo, 1);
+                setTimeout(function(address) {
+                  this.makeRequestInvalidInMempoolValidRegistry(address)
                 }, 30 * 60 * 1000);
                 console.log(JSON.stringify(mempoolValid) + '\n\nYou are granted access to store a star\n\n');
                 resolve(mempoolValid);

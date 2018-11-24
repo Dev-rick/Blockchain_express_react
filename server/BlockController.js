@@ -1,14 +1,12 @@
 import Block from './Block.js';
-import Blockchain from './simpleChain.js';
+import Blockchain from './Blockchain.js';
 import path from 'path';
-import Mempool from './mempool.js';
-// Require file system access
-import fs from 'fs';
+import Mempool from './Mempool.js';
+import BlockDecoded from './BlockDecoded';
 /**
  * Controller Definition to encapsulate routes to work with blocks
  */
 class BlockController {
-
   /**
    * Constructor to create a new BlockController, you need to initialize here all your endpoints
    * @param {*} app
@@ -70,15 +68,33 @@ class BlockController {
    */
   postNewBlock() {
     this.app.post('/block', (req, res) => {
-      let myBlockchain = new Blockchain();
-      let jsonObject = req.body;
-      if (jsonObject === undefined || JSON.stringify(jsonObject).length === 0) {
-        return res.send('No Body -> No Block Added');
+      const myBlockchain = new Blockchain();
+      const maxBytesForStory = 500;
+      const isASCII = ((str) => /^[\x00-\x7F]*$/.test(str));
+      const body = req.body;
+      const address = body.address;
+      const star = body.star;
+      const {
+        dec,
+        ra,
+        story
+      } = star;
+      // checks if body is not empty
+      if (!star) {
+        return res.send('Pleasy fill in the star parameter');
       }
-      // checks if only one star is in the request
+      // checks if an address was entered
+      if (!address) {
+        return res.send('Pleasy fill in the address');
+      }
+      //checks if address has a valid request in mempoolValidRegistry
+      if (!this.mempool.verifyAddressRequest(address)) {
+        return res.send('There is no request.\n\nPlease make first a request at localhost:8000/requestValidation and then sign this message');
+      }
+      //checks if only one star is in the request
       let output = [];
-      for (let key in jsonObject) {
-        if (jsonObject.hasOwnProperty(key)) {
+      for (let key in body) {
+        if (body.hasOwnProperty(key)) {
           if (output.includes(key)) {
             res.send('please only save one star!');
           } else {
@@ -86,18 +102,39 @@ class BlockController {
           }
         }
       }
-      //if a signed request exists the user is able to register the star
-      this.mempool.checkIfAddressIsInMempoolValidRegistry(req.body.address).then(() => {
-        let blockToAdd = new Block(jsonObject);
-        myBlockchain.addBlock(blockToAdd)
-          .then((blockToAdd) => {
-            console.log(blockToAdd);
-            return res.send(blockToAdd);
-          });
-      }).catch((err) => {
-        console.log(err);
-        res.send(err);
-      });
+      // checks if property are strings of the star parameters and if they are not empty
+      if (typeof dec !== 'string' || typeof ra !== 'string' || typeof story !== 'string' || !dec.length || !ra.length || !story.length) {
+        return res.send('Your star information should include non-empty string properties \'dec\', \'ra\' and \'story\'');
+      }
+      // checks how long the story is
+      if (Buffer.from(story).length > maxBytesForStory) {
+        return res.send('The story you entered is too long. Maximum size is 500 bytes');
+      }
+      //checks if only ASCII characters were used
+      if (!isASCII(story)) {
+        return res.send('Please only use ASCII symbols');
+      }
+      body.star = {
+        dec: star.dec,
+        ra: star.ra,
+        story: Buffer.from(story).toString('hex'),
+        mag: star.mag,
+        con: star.con
+      };
+      this.mempool.makeRequestInvalidInMempoolValidRegistry(address);
+      let blockToAdd = new Block(body);
+      console.log(blockToAdd);
+      myBlockchain.addBlock(blockToAdd)
+        .then((blockToAddString) => {
+          const blockToAddObject = JSON.parse(blockToAddString);
+          const blockDecoded = new BlockDecoded(blockToAddObject);
+          console.log(blockDecoded);
+          return res.send(blockDecoded);
+        })
+        .catch((err) => {
+          res.send(JSON.stringify(err));
+          console.log(err);
+        });
     });
   }
 
