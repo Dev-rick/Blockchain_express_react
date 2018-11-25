@@ -5,7 +5,7 @@ class MempoolValid {
       address: request.walletAddress,
       requestTimeStamp: request.requestTimeStamp,
       message: request.message,
-      validationWindow: 30 * 60,
+      validationWindow: request.ValidationWindow,
       messageSignature: true
     };
   }

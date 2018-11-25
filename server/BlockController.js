@@ -51,16 +51,16 @@ class BlockController {
 
   getBlockByIndex() {
     this.app.get('/block/:index', (req, res) => {
-      if (req.params.index <= 0 || isNaN(req.params.index)) {
+      if (req.params.index < 0 || isNaN(req.params.index)) {
         return res.send('Please enter a valid height');
       } else {
         this.myBlockchain.getChain()
           .then((chain) => {
-            if (req.params.index > chain.length) {
+            if (req.params.index > chain.length - 1) {
               return res.send('Block not found');
             } else {
               this.myBlockchain.getBlockByHeight(req.params.index).then((block) => {
-                if (block.height === 1) {
+                if (block.height === 0) {
                   // Genesis Block does not need to be decoded.
                   console.log(block);
                   return res.send(block);
@@ -85,7 +85,7 @@ class BlockController {
             return res.send('Block not found');
           } else {
             this.myBlockchain.getBlockByHash(hash).then((block) => {
-              if (block.height === 1) {
+              if (block.height === 0) {
                 // Genesis Block does not need to be decoded.
                 console.log(block);
                 return res.send(block);
@@ -114,7 +114,7 @@ class BlockController {
             this.myBlockchain.getBlocksByWalletAddress(address).then((arrayOfBlocks) => {
                 const outputOfBlocks = [];
                 arrayOfBlocks.forEach(block => {
-                  if (block.height === 1) {
+                  if (block.height === 0) {
                     outputOfBlocks.push(block);
                   } else {
                     outputOfBlocks.push(new BlockDecoded(block));
@@ -190,7 +190,6 @@ class BlockController {
       };
       this.mempool.makeRequestInvalidInMempoolValidRegistry(address);
       let blockToAdd = new Block(body);
-      console.log(blockToAdd);
       this.myBlockchain.addBlock(blockToAdd)
         .then((blockToAddString) => {
           const blockToAddObject = JSON.parse(blockToAddString);

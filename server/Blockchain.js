@@ -36,11 +36,11 @@ class Blockchain {
   createGenesisBlock(genesisBlock) {
     if (this.chain.length === 0) {
       console.log('Adding the first Block - the Genesis Block!\n');
-      genesisBlock.height = 1;
+      genesisBlock.height = 0;
       genesisBlock.time = new Date().getTime().toString().slice(0, -3);
       genesisBlock.hash = SHA256(JSON.stringify(genesisBlock)).toString();
       console.log(genesisBlock);
-      return addLevelDBData(1, JSON.stringify(genesisBlock).toString()).then(() => {
+      return addLevelDBData(this.chain.length, JSON.stringify(genesisBlock).toString()).then(() => {
 
       });
     } else {
@@ -64,16 +64,16 @@ class Blockchain {
     return this.getChain().then((dataArray) => {
       return new Promise((resolve, reject) => {
         if (dataArray.length > 0) {
-          this.getBlockByHeight(dataArray.length).then((requestedBlock) => {
+          this.getBlockByHeight(dataArray.length - 1).then((requestedBlock) => {
             console.log('adding following block...\n');
             // UTC timestamp
             newBlock.time = new Date().getTime().toString().slice(0, -3);
             // Block height
-            newBlock.height = dataArray.length + 1;
+            newBlock.height = dataArray.length;
             // previous block hash
             newBlock.previousBlockHash = requestedBlock.hash;
             newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-            resolve(addLevelDBData(dataArray.length + 1, JSON.stringify(newBlock)));
+            resolve(addLevelDBData(dataArray.length, JSON.stringify(newBlock)));
           });
         } else {
           console.log('Genesis Block is missing\n');

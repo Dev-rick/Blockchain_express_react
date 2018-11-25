@@ -16,8 +16,9 @@ class Mempool {
         let request = new Request(address);
         this.mempoolRegistryOnlyAddresses.push(address);
         this.mempoolRegistry.push(request);
+        const that = this;
         setTimeout(function(address) {
-          this.makeRequestInvalidInMempoolRegistry(address);
+          that.makeRequestInvalidInMempoolRegistry(address);
         }, 5 * 60 * 1000);
         resolve(request);
       } else {
@@ -91,8 +92,9 @@ class Mempool {
                 console.log(address);
                 this.mempoolValidRegistryOnlyAddresses.push(address);
                 this.mempoolValidRegistry.push(mempoolValid);
+                const that = this;
                 setTimeout(function(address) {
-                  this.makeRequestInvalidInMempoolValidRegistry(address);
+                  that.makeRequestInvalidInMempoolValidRegistry(address);
                 }, 30 * 60 * 1000);
                 console.log(JSON.stringify(mempoolValid) + '\n\nYou are granted access to store a star\n\n');
                 resolve(mempoolValid);
