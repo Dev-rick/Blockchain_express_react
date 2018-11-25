@@ -141,11 +141,6 @@ class BlockController {
       const body = req.body;
       const address = body.address;
       const star = body.star;
-      const {
-        dec,
-        ra,
-        story
-      } = star;
       // checks if body is not empty
       if (!star) {
         return res.send('Pleasy fill in the star parameter');
@@ -170,6 +165,11 @@ class BlockController {
         }
       }
       // checks if property are strings of the star parameters and if they are not empty
+      const {
+        dec,
+        ra,
+        story
+      } = star;
       if (typeof dec !== 'string' || typeof ra !== 'string' || typeof story !== 'string' || !dec.length || !ra.length || !story.length) {
         return res.send('Your star information should include non-empty string properties \'dec\', \'ra\' and \'story\'');
       }

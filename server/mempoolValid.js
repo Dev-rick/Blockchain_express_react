@@ -3,9 +3,9 @@ class MempoolValid {
     this.registerStar = true;
     this.status = {
       address: request.walletAddress,
-      requestTimeStamp: request.requestTimeStamp,
+      requestTimeStamp: request.timeStamp,
       message: request.message,
-      validationWindow: request.ValidationWindow,
+      validationWindow: request.validationWindow,
       messageSignature: true
     };
   }

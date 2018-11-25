@@ -63,9 +63,10 @@ class Mempool {
   updateValidationWindow(request, alreadyInMempoolValidRegistry) {
     if (!alreadyInMempoolValidRegistry) {
       const mempoolRegistryWindowTime = 5 * 60 * 1000;
-      const timestampOfRequest = request.timestamp;
+      const timestampOfRequest = request.timeStamp;
       let timeElapse = (new Date().getTime().toString().slice(0, -3)) - timestampOfRequest;
       let timeLeft = (mempoolRegistryWindowTime / 1000) - timeElapse;
+      console.log(timeLeft);
       request.validationWindow = timeLeft;
     } else {
       const mempoolValidRegistryWindowTime = 30 * 60 * 1000;
@@ -87,11 +88,10 @@ class Mempool {
             try {
               let isValid = bitcoinMessage.verify(request.message, address, signature);
               if (isValid) {
-                this.makeRequestInvalidInMempoolRegistry(address);
                 let mempoolValid = new MempoolValid(request);
-                console.log(address);
                 this.mempoolValidRegistryOnlyAddresses.push(address);
                 this.mempoolValidRegistry.push(mempoolValid);
+                this.makeRequestInvalidInMempoolRegistry(address);
                 const that = this;
                 setTimeout(function(address) {
                   that.makeRequestInvalidInMempoolValidRegistry(address);
